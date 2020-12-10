@@ -1,7 +1,8 @@
-// Create user
+// Create user schema
+
+const constants = require("../helpers/constants")
 
 const userSchema = {
-    full_name: "string|empty:false",
     first_name: "string|empty:false",
     last_name: "string|empty:false",
     email: "email",
@@ -10,8 +11,15 @@ const userSchema = {
     $$strict: true
 }
 
+// create account
+const createAccountSchema ={
+    username: "string|lowercase|empty:false|alphanum",
+    password: `string|empty:false|min:${constants.passwordLength}`,
+    $$strict: true
+}
+
+// edit user schema
 const editUserSchema = {
-    full_name: "string|empty:false|optional",
     first_name: "string|empty:false|optional",
     last_name: "string|empty:false|optional",
     email: "email|optional",

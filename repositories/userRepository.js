@@ -15,6 +15,39 @@ function createUser (user) {
     })
 }
 
+function verifyUserName (username) {
+    return new Promise((resolve, reject) => {
+        knex.first()
+        .from('user')
+        .where('username',username)
+        .catch( function(error) {
+            reject(error)
+        })
+        .then(function(data) {
+            if(data) {
+                resolve(true)
+            } else {
+                resolve(false)
+            }
+        })
+    })
+}
+
+function createAccount(data, userId) {
+    return new Promise((resolve, reject) => {
+        knex('user')
+            .where('id', userId)
+            .update(data)
+            .catch(function (error) {
+                reject(error)
+            })
+            .then(function (insertId) {
+                console.log("insertId", insertId[0])
+                resolve(insertId[0])
+            }) 
+    })  
+}
+
 function getUser (userId) {
     return new Promise((resolve, reject) => {
         
@@ -61,5 +94,7 @@ module.exports = {
     createUser,
     getUser,
     editUser,
-    deleteUser
+    deleteUser,
+    verifyUserName,
+    createAccount
 }

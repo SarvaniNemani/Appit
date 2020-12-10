@@ -6,5 +6,7 @@ exports.up = function(knex) {
 };
 
 exports.down = function(knex) {
-    return knex.schema.dropTable('user');
+    return knex.schema.alterTable('user', table => {
+        table.dropColumn('full_name')
+    });
 };

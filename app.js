@@ -5,6 +5,9 @@ var bodyParser = require('body-parser')
 
 var port = process.env.PORT || 3000;
 
+var logger = require('morgan');
+app.use(logger('dev'));
+
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.json());
@@ -15,14 +18,15 @@ app.use(bodyParser.urlencoded({
 loadRoutes()
 
 function loadRoutes() {
-
+    const path = `/users`;
     //Routes  
     const indexRouter = require('./routes/index');
+    const authorizationRouter = require('./routes/authorizationRoute');
     const usersRouter = require('./routes/userRoute');
     
-    app.use(`/users`, usersRouter)
-    app.use(indexRouter);
-
+    app.use(indexRouter)
+    app.use(path, authorizationRouter)
+    app.use(path, usersRouter)
 }
 
 app.listen(port);

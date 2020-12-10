@@ -12,6 +12,15 @@ router.post (
     userController.createUser,
 )
 
+//create account
+router.post (
+    '/:user_id/setupAccount',
+    validatorHelper.validateBody(userValidator.setUpAccount),
+    userController.verifyUserName,
+    userController.setUpAccount,
+    
+)
+
 //get user
 router.get (
     `/:user_id`,
@@ -21,8 +30,8 @@ router.get (
 //edit user
 router.put (
     `/:user_id`,
-    validatorHelper.validateBody(userValidator.editUserSchema),
     userController.editUser,
+    validatorHelper.validateBody(userValidator.editUserSchema),
 )
 
 //delete user

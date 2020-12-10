@@ -1,12 +1,18 @@
 var userRepository = require('../repositories/userRepository');
 const StatusCodes = require('http-status-codes').StatusCodes;
+var bcrypt = require('bcryptjs');
+const constants = require('../helpers/constants');
 
 async function createUser(req, res) {
     console.log(req.body);
 
     try {
         // creating new user
-        await userRepository.createUser(req.body);
+        let user = req.body;
+        let full_name = user.first_name + user.last_name;
+        user.full_name = full_name;
+        await userRepository.createUser(user);
+        
         // sending response
         res.status(StatusCodes.CREATED)
         .send({
@@ -20,6 +26,55 @@ async function createUser(req, res) {
     }
     
 }
+
+async function setUpAccount(req, res) {
+    var userId = req.params.user_id
+    console.log("userId", userId)
+    // password encryption to save it in db
+    var salt = bcrypt.genSaltSync(constants.saltRounds);
+    var passwordHash = bcrypt.hashSync(req.body.password, salt);
+
+    let data = {
+        "username": req.body.username,
+        "password": passwordHash
+    }
+
+    try {
+        await userRepository.createAccount(data, userId);
+        res.status(StatusCodes.CREATED)
+        .send({
+            "message": "User created successfully.. Please login to continue"
+        })
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .send({
+            "message": error.message
+        })     
+    }
+}
+
+async function verifyUserName(req, res, next) {
+    let username = req.body.username;
+     try {
+         let alreadyExists = await userRepository.verifyUserName(username);
+
+         if(alreadyExists) {
+            res.status(StatusCodes.NOT_ACCEPTABLE)
+            .send({
+                "message": "Username already exists"
+            })
+         } else {
+             next()
+         }
+     } catch (error) {
+         res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+         .send({
+             "message": error.message
+         })
+         
+     }
+}
+
 
 async function getUser(req, res) {
 
@@ -53,6 +108,7 @@ async function editUser(req, res) {
     try {
         //edit user 
         let userId = req.params.user_id;
+        user.full_name = user.first_name + user.last_name;
         let editUserId = await userRepository.editUser(user, userId);
         if(!editUserId) {
             return res.status(StatusCodes.NOT_FOUND)
@@ -101,5 +157,7 @@ module.exports = {
     createUser,
     getUser,
     editUser,
-    deleteUser
+    deleteUser,
+    verifyUserName,
+    setUpAccount
 }
