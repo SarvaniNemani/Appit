@@ -4,6 +4,13 @@ const loginSchema = {
     $$strict: true
 }
 
+const refreshTokenSchema = {
+    refresh_token: "string|empty:false",
+    user_id: "number|empty:false",
+    $$strict: true
+}
+
 module.exports = {
     loginSchema,
+    refreshTokenSchema
 }

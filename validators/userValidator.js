@@ -12,7 +12,7 @@ const userSchema = {
 }
 
 // create account
-const createAccountSchema ={
+const setUpAccountSchema ={
     username: "string|lowercase|empty:false|alphanum",
     password: `string|empty:false|min:${constants.passwordLength}`,
     $$strict: true
@@ -30,5 +30,6 @@ const editUserSchema = {
 
 module.exports = {
     userSchema,
-    editUserSchema
+    editUserSchema,
+    setUpAccountSchema
 }

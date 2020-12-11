@@ -2,6 +2,7 @@ const { StatusCodes } = require("http-status-codes");
 const helper = require("../helpers/helper");
 const authorizationRepository = require("../repositories/authorizationRepository");
 const { v4: uuidv4 } = require('uuid');
+const moment = require('moment');
 
 async function authenticateLoginDetails(req, res, next) {
     try {
@@ -43,16 +44,31 @@ async function authenticateLoginDetails(req, res, next) {
 async function login(req, res) {
     try {
         var user = req.user;
+        // generate access token
         var token = uuidv4();
-
+        var accessExpiry = new moment(Date.now()).add(1, 'minutes').format('YYYY-MM-DD HH:mm:ss');
         var data = {
             "user_id": user.id,
-            "token": token
+            "token": token,
+            "expiry_date": accessExpiry
         }
         var insertId = await authorizationRepository.insertToken(data)
+                
+        // generate refresh token
+        var refresh_token = uuidv4();
+        var refreshExpiry = new moment(Date.now()).add(10, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        var refreshData = {
+            "user_id": user.id,
+            "refresh_token": refresh_token,
+            "access_token": token,
+            "expiry_date": refreshExpiry
+        }
+
+        var reftoken = await authorizationRepository.insertRefreshToken(refreshData)
         res.status(StatusCodes.OK)
         .send({
             "token": token,
+            "refresh_token": refresh_token,
             "user": {
                 "id": user.id,
                 "username": user.username,
@@ -68,12 +84,48 @@ async function login(req, res) {
         
     }
 }
+async function refreshToken(req, res, next) {
+
+    var refreshToken = req.body.refresh_token;
+
+    // validate refresh token
+    try {
+        var refreshTokenRecord = await authorizationRepository.getRefreshToken(refreshToken, req.body.user_id);
+        if (refreshTokenRecord) {
+            req.refreshToken = refreshTokenRecord;
+            var userId = req.body.user_id;
+            // generate new access token            
+            var token = uuidv4();
+            var updateToken = await authorizationRepository.updateToken(userId, token);
+            var updateAccessToken = await authorizationRepository.updateAccessToken(req.refreshToken.refresh_token, token);
+            res.status(StatusCodes.OK).send({
+                "status_code": StatusCodes.OK,
+                "access_token": token,
+                "refresh_token": req.refreshToken.refresh_token
+            })
+        } else {
+            res.status(StatusCodes.OK)
+                .send({
+                    "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                    "message": "Expired/Invalid refresh token. Please login again"
+                })
+        }
+    } catch (error) {
+        res.status(StatusCodes.OK)
+            .send({
+                "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                "message": error.message
+            })
+    }
+}
 
 async function logout(req, res) {
     try {
-        let userId = req.params.user_id;
+        // let userId = req.params.user_id;
+        var token = req.headers['authorization'];
         
-        var insertId = await authorizationRepository.removeToken(userId)
+        // var insertId = await authorizationRepository.removeToken(userId);
+        var insertId = await authorizationRepository.removeToken(token);
         res.status(StatusCodes.OK)
         .send({
             "message" : "logged out"
@@ -88,5 +140,6 @@ async function logout(req, res) {
 module.exports = {
     authenticateLoginDetails,
     login,
+    refreshToken,
     logout
 }

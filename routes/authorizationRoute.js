@@ -13,8 +13,15 @@ router.post(
     authController.login
 )
 
+// refresh token
+router.post(
+    '/refreshToken',
+    validateHelper.validateBody(authorizationValidator.refreshTokenSchema),
+    authController.refreshToken
+)
+
 //logout
-router.delete(
+router.post(
     '/:user_id/logout',
     authController.logout
 
