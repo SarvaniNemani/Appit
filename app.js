@@ -25,8 +25,8 @@ function loadRoutes() {
     const usersRouter = require('./routes/userRoute');
     
     app.use(indexRouter)
-    app.use(path, authorizationRouter)
-    app.use(path, usersRouter)
+    app.use(`auth`, authorizationRouter)
+    app.use(`users`, usersRouter)
 }
 
 app.listen(port);
