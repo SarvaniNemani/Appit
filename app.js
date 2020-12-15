@@ -18,15 +18,15 @@ app.use(bodyParser.urlencoded({
 loadRoutes()
 
 function loadRoutes() {
-    const path = `/users`;
+    // const path = `/users`;
     //Routes  
     const indexRouter = require('./routes/index');
     const authorizationRouter = require('./routes/authorizationRoute');
     const usersRouter = require('./routes/userRoute');
     
     app.use(indexRouter)
-    app.use(`auth`, authorizationRouter)
-    app.use(`users`, usersRouter)
+    app.use(`/auth`, authorizationRouter)
+    app.use(`/users`, usersRouter)
 }
 
 app.listen(port);

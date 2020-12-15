@@ -81,7 +81,8 @@ async function getUser(req, res) {
     try {
         //get user 
         let userId = req.params.user_id;
-        let user = await userRepository.getUser(userId);
+        let str = req.query.search;
+        let user = await userRepository.getUser(userId, str);
 
         if(!user) {
             return res.status(StatusCodes.NOT_FOUND)
@@ -99,6 +100,55 @@ async function getUser(req, res) {
             "message": error.message
         })
     }
+}
+
+async function getAllUsers(req, res) {
+
+    try {
+        //get all users 
+        let page = req.query.page;
+        let limit = req.query.limit;
+
+        // calculate offset
+        if(!page) {
+            page = 1;
+        } 
+        if(!limit) {
+            limit = 10;
+        }
+        let offset = (page * limit) - limit;
+
+        let str = req.query.search;
+        let status = req.query.status;
+        if(!str) {
+            str='';
+        }
+        if(status === "active") {
+            status = 1;
+        } else if(status === "inactive") {
+            status = 0;
+        } else {
+            status;
+        }
+        let user = await userRepository.getAllUsers(str, status, limit, offset);
+
+        if(!user) {
+            return res.status(StatusCodes.NOT_FOUND)
+            .send({
+                "message": "No user found"
+            })
+        }
+        res.status(StatusCodes.OK)
+        .send({
+            "user": user
+        })        
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .send({
+            "message": error.message
+        })
+    }
+    
 }
 
 async function editUser(req, res) {
@@ -128,6 +178,26 @@ async function editUser(req, res) {
     }
 }
 
+async function editAddress(req, res) {
+    let address = req.body;
+
+    try {
+        //edit address 
+        let userId = req.params.user_id;
+        address.user_id = userId;
+        let editAddrress = await userRepository.editAddress(address, userId);
+        res.status(StatusCodes.OK)
+        .send({
+            "user": address
+        })        
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .send({
+            "message": error.message
+        })
+    }
+
+}
 async function deleteUser(req, res) {
 
     let user = req.body;
@@ -156,8 +226,11 @@ async function deleteUser(req, res) {
 module.exports = {
     createUser,
     getUser,
+    getAllUsers,
     editUser,
+    editAddress,
     deleteUser,
     verifyUserName,
-    setUpAccount
+    setUpAccount,
+    
 }

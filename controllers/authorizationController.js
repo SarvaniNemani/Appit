@@ -46,7 +46,7 @@ async function login(req, res) {
         var user = req.user;
         // generate access token
         var token = uuidv4();
-        var accessExpiry = new moment(Date.now()).add(1, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        var accessExpiry = new moment(Date.now()).add(2, 'hours').format('YYYY-MM-DD HH:mm:ss');
         var data = {
             "user_id": user.id,
             "token": token,
@@ -56,7 +56,7 @@ async function login(req, res) {
                 
         // generate refresh token
         var refresh_token = uuidv4();
-        var refreshExpiry = new moment(Date.now()).add(10, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        var refreshExpiry = new moment(Date.now()).add(20, 'hours').format('YYYY-MM-DD HH:mm:ss');
         var refreshData = {
             "user_id": user.id,
             "refresh_token": refresh_token,

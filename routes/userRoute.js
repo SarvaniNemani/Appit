@@ -33,15 +33,29 @@ router.post (
 //get user
 router.get (
     `/:user_id`,
+    // ``,
     helper.authorize,
     userController.getUser,
+)
+
+//get all users
+router.get (
+    ``,
+    helper.authorize,
+    userController.getAllUsers,
 )
 
 //edit user
 router.put (
     `/:user_id`,
+    helper.authorize,
     validatorHelper.validateBody(userValidator.editUserSchema),
     userController.editUser,  
+)
+
+router.put (
+    `/address/:user_id`,
+    userController.editAddress, 
 )
 
 //delete user
