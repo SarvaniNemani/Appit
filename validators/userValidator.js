@@ -8,6 +8,7 @@ const userSchema = {
     email: "email",
     phone: "number|optional",
     status: "boolean|optional",
+    role_id: { type: "array", items: "number", enum: constants.userRoles },
     $$strict: true
 }
 

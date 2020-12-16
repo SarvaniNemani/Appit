@@ -1,5 +1,5 @@
-const Validator = require('fastest-validator');
-const StatusCodes = require('http-status-codes');
+const Validator = require("fastest-validator");
+const StatusCodes = require('http-status-codes').StatusCodes;
 
 const dateFormat = 'YYYY/MM/DD';
 

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const authorizationRepository = require('../repositories/authorizationRepository');
-const StatusCodes = require('http-status-codes');
+const StatusCodes = require('http-status-codes').StatusCodes;
 
 function comparePasswords(input, hash) {
     console.log("comparePasswords", input);
