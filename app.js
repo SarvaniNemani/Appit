@@ -19,7 +19,6 @@ app.use(express.static('static'));
 loadRoutes()
 
 function loadRoutes() {
-    // const path = `/users`;
     //Routes  
     const indexRouter = require('./routes/index');
     const authorizationRouter = require('./routes/authorizationRoute');

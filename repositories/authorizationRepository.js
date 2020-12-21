@@ -40,11 +40,56 @@ function insertToken(data) {
     })  
 }
 
+//inserting resetpassword token 
+function resetPasswordToken(data) {
+    return new Promise((resolve, reject) => {
+        knex('reset_tokens')
+            .insert(data)
+            .catch(function (error) {
+                reject(error)
+            })
+            .then(function (insertId) {
+                console.log("insertId", insertId)
+                resolve()
+            }) 
+    })  
+}
+
 function updateToken(userId, token) {
     return new Promise((resolve, reject) => {
         knex('user_access_token')
         .where({ 'user_id': userId })
         .update({ 'token': token })
+        .catch(function (error) {
+            reject(error)
+        })
+        .then(function () {
+            resolve()
+        })
+    })
+}
+
+function updatePassword(userId, password) {
+    return new Promise((resolve, reject) => {
+        knex('user')
+        .where({ 'id': userId })
+        .update({ 'password': password })
+        .catch(function (error) {
+            reject(error)
+        })
+        .then(function () {
+            resolve()
+        })
+    })
+}
+
+function deleteResetToken(token) {
+    const timestamp = knex.fn.now();
+    return new Promise((resolve, reject) => {
+        knex('reset_tokens')
+        .where({'token': token})
+        .orWhere('expiry_date','<',timestamp)
+        .delete()
         .catch(function (error) {
             reject(error)
         })
@@ -101,6 +146,25 @@ function getUserToken(userid, token) {
 
 }
 
+function tokenValidation(token) {
+    return new Promise((resolve, reject) => {
+        let query = `SELECT user_id FROM reset_tokens WHERE token = "${ token }" and expiry_date > now(); `
+
+        knex.raw(query)
+            .catch(function (error) {
+                reject(error)
+            })
+            .then(function (res) {
+                console.log(res);
+                if(res[0][0] != null) {
+                    resolve(res[0][0].user_id)
+                } else {
+                    resolve(false)
+                }
+            }) 
+    })  
+
+}
 function getRefreshToken(token, userId) {
 
     return new Promise((resolve, reject) => {
@@ -143,10 +207,14 @@ function removeToken(token) {
 module.exports = {
     getUserForUsername,
     insertToken,
+    resetPasswordToken,
     insertRefreshToken,
     getRefreshToken,
     removeToken,
     getUserToken,
     updateToken,
-    updateAccessToken
+    tokenValidation,
+    updatePassword,
+    updateAccessToken,
+    deleteResetToken
 }

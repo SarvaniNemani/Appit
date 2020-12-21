@@ -1,0 +1,406 @@
+FORMAT: 1A
+HOST: https://polls.apiblueprint.org/
+
+# User API 
+
+Users login and logout details
+
+##Auth [/auth]
+
+### Login [POST /login]
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                
+                "username": "user",
+                "password": "xyz"
+                
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "success",
+            "token": "access token",
+            "refresh_token": "refresh token",
+            "user": {
+                "id": 1,
+                "username": "user",
+                "full_name": "full_name",
+                "email": "email"
+        }
+        {
+            "status_code": 404,
+            "message": "User name does not exist"
+        }
+        {
+            "status_code": 203,
+            "message": "Invalid credentials"
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+        
+### Refresh Token [POST /refreshToken]
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                
+                "refresh_token": "refeshtoken",
+                "user_id": 3
+
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "success",
+            "access_token": "accesstoken",
+            "refresh_token": "refreshToken"
+        }
+        {
+            "status_code": 203,
+            "message": "Expired/Invalid refresh token. Please login again"
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+
+### Forgot Password [POST /forgotPassword]
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                
+                "username": "user",
+
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "A reset link has been sent to your registered email.",
+            "link": "url"
+        }
+        {
+            "status_code": 404,
+            "message": "Username doesnot exist"
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+        
+### Reset Password [POST /resetPassword]
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                
+                "token": "reset token",
+
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "Password updated successfully",
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+        
+### Logout [POST /logout]
+
++ Request (application/json)
+
+    + headers
+        
+            Authorization: "fdsfdsg"
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "Logged out",
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+
+## Users [/users]
+
+### Create User [POST]
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: x15484465798x, 
+            user_id: 2
+
+    + Body
+    
+            {
+                "first_name": "user",
+                "last_name": "one",
+                "email": "userone@gmail.com",
+                "phone": 8797897894,
+                "status": 1,
+                "role_id": [1]
+            }
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 201,
+            "message": "success"
+        }
+        {
+            "status_code": 203,
+            "message": "Invalid token or token expired"
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+
+### create super user [POST /superuser]
+
++ Request (application/json)
+
+    + Body
+    
+            {
+                "first_name": "user",
+                "last_name": "one",
+                "email": "userone@gmail.com",
+                "phone": 8797897894,
+                "status": 1,
+                "role_id": [1]
+            }
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 201,
+            "message": "success"
+        }
+        {
+            "status_code": 500,
+            "message": "Internal server error"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+
+### Setup Account [POST /{user_id}/setupAccount]
+
++ Request (application/json)
+    + Body
+    
+            {
+                "username": "user123",
+                "password": "Test@123",
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 201,
+            "message": "User created successfully.. Please login to continue"
+        }
+        {
+            "status_code": 406,
+            "message": "Username already exists"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+        
+### Get all Users [GET /?limit=10&page='some value'&status=inactive&role_id=[1]]
+
++ Request (application/json)
+
+    + Headers
+           
+            Authorization: xyzabcxyz
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "users": [
+                {
+                    "id": 2,
+                    "first_name": "user",
+                    "last_name": "two"
+                    "email": "user2@gmail.com",
+                    "phone": "5647891234",
+                    "created_at": 15-12-2020,
+                    "name": "user",
+                    "status": "active",
+                    "role_id":2,
+                    "username":"usertwo"
+                },
+                {
+                    "id": 3,
+                    "first_name": "third",
+                    "last_name": "user"
+                    "email": "user3@gmail.com",
+                    "phone": "5647891234",
+                    "created_at": 15-12-2020,
+                    "name": "user",
+                    "status": "active",
+                    "role_id":2,
+                    "username":"usertwo"
+                },
+            ],
+        {
+            "status_code": 404,
+            "message": "No users found."
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+        {
+            "status_code": 403,
+            "message": "Invalid token or token expired"
+        }
+
+### Get User Details [GET /{user_id}]
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: xyzabcxyz
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "user": 
+            {
+                "id": 2,
+                    "first_name": "user",
+                    "last_name": "two"
+                    "email": "user2@gmail.com",
+                    "phone": "5647891234",
+                    "created_at": 15-12-2020,
+                    "name": "user",
+                    "status": "active",
+                    "role_id":2,
+                    "username":"usertwo",
+                    "street": "asfsd",
+                    "state": "AP",
+                    "zip": 545788
+            }
+        }
+        
+### Edit User [PUT /{user_id}]
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: xyzabcxyz
+
+    + Body
+    
+            {
+                "email": "app@gmail.com",
+                "phone": "1234123412",
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "Updated Successfully"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+        }
+        {
+            "status_code": 404,
+            "message": "user does not exists"
+        }
+        
+### Edit address [PUT /address/{user_id}]
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: xyzabcxyz
+            Role: admin
+
+    + Body
+
+            {
+                "state": "telangana",
+                "zip": "533214"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "Address updated"
+        }
+        {
+            "status_code": 422,
+            "message": "Validation Errors",
+
+        }
+
+### Delete User [DELETE /{user_id}]
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: xyzabcxyz
+
++ Response 200 (application/json)
+
+        {
+            "status_code": 200,
+            "message": "User deleted"
+        }
+         {
+            "status_code": 422,
+            "message": "Validation Errors",
+
+        }

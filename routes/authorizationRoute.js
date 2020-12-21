@@ -20,6 +20,17 @@ router.post(
     authController.refreshToken
 )
 
+//forget password
+router.post(
+    '/forgotPassword', 
+    authController.forgotPassword
+)
+
+//reset password
+router.post(
+    '/resetPassword',
+    authController.resetPassword
+)
 //logout
 router.post(
     '/:user_id/logout',

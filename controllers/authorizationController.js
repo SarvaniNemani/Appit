@@ -3,6 +3,9 @@ const helper = require("../helpers/helper");
 const authorizationRepository = require("../repositories/authorizationRepository");
 const { v4: uuidv4 } = require('uuid');
 const moment = require('moment');
+const config = require('../config/config');
+var bcrypt = require('bcryptjs');
+const constants = require('../helpers/constants');
 
 async function authenticateLoginDetails(req, res, next) {
     try {
@@ -106,10 +109,87 @@ async function refreshToken(req, res, next) {
         } else {
             res.status(StatusCodes.OK)
                 .send({
-                    "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                    "status_code": StatusCodes.NON_AUTHORITATIVE_INFORMATION,
                     "message": "Expired/Invalid refresh token. Please login again"
                 })
         }
+    } catch (error) {
+        res.status(StatusCodes.OK)
+            .send({
+                "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                "message": error.message
+            })
+    }
+}
+
+//forget password
+async function forgotPassword(req, res, next) {
+    try {
+        //check if user exist
+        let user = await authorizationRepository.getUserForUsername(req.body.username);
+        if (!user) {
+            return res.status(StatusCodes.OK)
+                .send({
+                    "status_code": StatusCodes.NOT_FOUND,
+                    "message": "username does not exists"
+                })
+        }
+        //generate token
+        var token = uuidv4();
+        var tokenExpiry = new moment(Date.now()).add(2, 'hours').format('YYYY-MM-DD HH:mm:ss');
+        var data = {
+            "user_id": user.id,
+            "token": token,
+            "expiry_date": tokenExpiry
+        }
+        var insertId = await authorizationRepository.resetPasswordToken(data);
+        //url
+        let resetPath = `resetPassword/${token}`;
+        let url = `https://localhost:3000/${resetPath}`;
+        console.log(url);
+        console.log(`send reset mail from ${config.sourceEmail} to ${user.email}.`)
+        res.status(StatusCodes.OK)
+        .send({
+            "status_code": StatusCodes.OK,
+            "message": "A reset link has been sent to your registered email.",
+            "link": url
+        })
+
+    } catch (error) {
+        res.status(StatusCodes.OK)
+            .send({
+                "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                "message": error.message
+            })
+    }    
+}
+
+// reset password
+async function resetPassword(req, res) {
+    try {
+        var token = req.body.token;
+        // validating given token
+        var userId = await authorizationRepository.tokenValidation(token);
+        if (!userId) {
+            return res.status(StatusCodes.OK)
+                .send({
+                    "status_code": StatusCodes.INTERNAL_SERVER_ERROR,
+                    "message": "Invalid token or token expired"
+                })
+        }
+        // hash password and updating in db
+        var salt = bcrypt.genSaltSync(constants.saltRounds);
+        var passwordHash = bcrypt.hashSync(req.body.password, salt);
+
+        var newPassword = await authorizationRepository.updatePassword(userId, passwordHash);
+        // clear reset token
+        await authorizationRepository.deleteResetToken(token);
+        res.status(StatusCodes.OK)
+            .send({
+                "status_code": StatusCodes.OK,
+                "message": "Password updated successfully"
+            })
+        
     } catch (error) {
         res.status(StatusCodes.OK)
             .send({
@@ -140,6 +220,8 @@ async function logout(req, res) {
 module.exports = {
     authenticateLoginDetails,
     login,
+    forgotPassword,
+    resetPassword,
     refreshToken,
     logout
 }
